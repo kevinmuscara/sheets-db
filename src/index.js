@@ -1,5 +1,6 @@
 const { authorize } = require('./util');
 const { google }    = require('googleapis');
+const sheets        = google.sheets('v4');
 
 class Database {
   constructor(spreadsheetId, PATH_TO_CREDS) {
@@ -10,6 +11,78 @@ class Database {
     this.creds = PATH_TO_CREDS;
 
     this.verifyAuth();
+  }
+
+  verifySchemaFormat = (schema) => {
+    console.assert(schema, `'schema' parameter is required`);
+
+    if(!schema.name)
+      return false;
+
+    if(!schema.properties)
+      return false;
+
+    return true;
+  }
+
+  createNewTable = (schema) => {
+    console.assert(schema, `'schema' parameter is required`);
+
+    if(!(this.verifySchemaFormat(schema))) {
+      console.error(`Schema format is incorrect.`); 
+      return;
+    } else {
+      const { name, properties } = schema;
+
+      const request = {
+        spreadsheetId: this.id,
+        resource: {
+          requests: [{
+            addSheet: {
+              properties: {
+                title: name
+              }
+            }
+          }]
+        }
+      }
+
+      authorize(this.creds).then(async(auth) => {
+        try {
+          google.sheets({ version: 'v4', auth }).spreadsheets.batchUpdate(request, (err, response) => {
+            if(err) 
+              console.error(err);
+            else 
+              if(response.status === 200)
+                return true
+          });
+        } catch(err) {
+          console.error(err);
+        }
+      });
+    }
+  }
+
+  addSchemas = (schemas) => {
+    console.assert(schemas, `'schemas' parameter is required`);
+
+    authorize(this.creds).then(async(auth) => {
+      try {
+        const sheets    = google.sheets({ version: 'v4', auth });
+        const tableData = await sheets.spreadsheets.get({ spreadsheetId: this.id, includeGridData: false });
+      
+        for(let i = 0; i < schemas.length; i++) {
+          if(tableData.data.sheets.some((sheet) => sheet.properties.title === schemas[i].name))
+            console.log(`${schemas[i].name} table already exists, skipping.`);
+          else {
+            this.createNewTable(schemas[i]);
+          }
+        }
+
+      } catch(err) {
+        console.error(err);
+      }
+    }); 
   }
 
   verifyAuth = () => {
@@ -51,7 +124,7 @@ class Database {
     });
   }
 
-  findFirst = (options = {}) => {
+  findFirst = (options) => {
     console.assert(options, `'options' parameter required.`);
 
     return new Promise(async(resolve, reject) => {
