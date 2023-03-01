@@ -1,20 +1,32 @@
 const { authorize } = require('./util');
 const { google }    = require('googleapis');
 
-authorize().then(async(auth) => {
-  const sheets = google.sheets({version: 'v4', auth});
+class Database {
+  constructor(spreadsheetId) {
+    console.assert(spreadsheetId, 'spreadsheetId parameter is required');
 
-  // '<table>!<range>'
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: '',
-    range: 'Users!A2:B',
-  });
-  const rows = res.data.values;
-  if (!rows || rows.length === 0) {
-    console.log('No data found.');
-    return;
+    this.verifyAuth(spreadsheetId);
   }
 
-  let users = rows.map(([email, password]) => { return { email, password }});
-  console.log(users);
-});
+  verifyAuth = (spreadsheetId) => {
+    authorize().then(async(auth) => {
+      try {
+        const sheets    = google.sheets({ version: 'v4', auth });
+        const tableData = await sheets.spreadsheets.values.get({ spreadsheetId, range: 'Users!A2:B' });
+        const rows      = tableData.data.values;
+      
+        if(!rows || rows.length === 0)
+          return console.log('No data in table.');
+    
+        if(typeof rows === 'object' && Array.isArray(rows) && rows !== null)
+          console.log(`Authentication verified.`);
+        else 
+          console.error(`Error verifiying authentication`);
+      } catch(err) {
+        console.error(`Error verifiying authentication.`);
+      }
+    });
+  }
+}
+
+module.exports = Database;
