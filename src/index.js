@@ -2,18 +2,21 @@ const { authorize } = require('./util');
 const { google }    = require('googleapis');
 
 class Database {
-  constructor(spreadsheetId) {
-    console.assert(spreadsheetId, 'spreadsheetId parameter is required');
+  constructor(spreadsheetId, PATH_TO_CREDS) {
+    console.assert(spreadsheetId, `'spreadsheetId' parameter is required`);
+    console.assert(PATH_TO_CREDS, `'PATH_TO_CREDS' parameter is required`);
 
-    this.spreadsheetId = spreadsheetId;
-    this.verifyAuth(spreadsheetId);
+    this.id    = spreadsheetId;
+    this.creds = PATH_TO_CREDS;
+
+    this.verifyAuth();
   }
 
-  verifyAuth = (spreadsheetId) => {
-    authorize().then(async(auth) => {
+  verifyAuth = () => {
+    authorize(this.creds).then(async(auth) => {
       try {
         const sheets    = google.sheets({ version: 'v4', auth });
-        const tableData = await sheets.spreadsheets.values.get({ spreadsheetId, range: 'Users!A2:B' });
+        const tableData = await sheets.spreadsheets.values.get({ spreadsheetId: this.id, range: 'Users!A2:B' });
         const rows      = tableData.data.values;
       
         if(!rows || rows.length === 0)
@@ -31,10 +34,10 @@ class Database {
 
   findMany = () => {
     return new Promise(async(resolve, reject) => {
-      await authorize().then(async(auth) => {
+      await authorize(this.creds).then(async(auth) => {
         try {
           const sheets    = google.sheets({ version: 'v4', auth });
-          const tableData = await sheets.spreadsheets.values.get({ spreadsheetId: this.spreadsheetId, range: 'Users!A2:B' });
+          const tableData = await sheets.spreadsheets.values.get({ spreadsheetId: this.id, range: 'Users!A2:B' });
           const rows      = tableData.data.values;
         
           if(!rows || rows.length === 0)
@@ -52,10 +55,10 @@ class Database {
     console.assert(options, `'options' parameter required.`);
 
     return new Promise(async(resolve, reject) => {
-      await authorize().then(async(auth) => {
+      await authorize(this.creds).then(async(auth) => {
         try {
           const sheets    = google.sheets({ version: 'v4', auth });
-          const tableData = await sheets.spreadsheets.values.get({ spreadsheetId: this.spreadsheetId, range: 'Users!A2:B' });
+          const tableData = await sheets.spreadsheets.values.get({ spreadsheetId: this.id, range: 'Users!A2:B' });
           const rows      = tableData.data.values;
         
           if(!rows || rows.length === 0)

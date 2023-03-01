@@ -5,7 +5,6 @@ const { authenticate } = require('@google-cloud/local-auth');
 const { google }       = require('googleapis');
 const SCOPES           = ['https://www.googleapis.com/auth/spreadsheets'];
 const TOKEN_PATH       = path.join(process.cwd(), 'token.json');
-const CREDENTIALS_PATH = path.join(process.cwd(), 'creds.json');
 
 async function loadSavedCredentialsIfExist() {
   try {
@@ -17,8 +16,8 @@ async function loadSavedCredentialsIfExist() {
   }
 }
 
-async function saveCredentials(client) {
-  const content = await fs.readFile(CREDENTIALS_PATH);
+async function saveCredentials(client, PATH_TO_CREDS) {
+  const content = await fs.readFile(PATH_TO_CREDS);
   const keys = JSON.parse(content);
   const key = keys.installed || keys.web;
   const payload = JSON.stringify({
@@ -30,17 +29,17 @@ async function saveCredentials(client) {
   await fs.writeFile(TOKEN_PATH, payload);
 }
 
-async function authorize() {
+async function authorize(PATH_TO_CREDS) {
   let client = await loadSavedCredentialsIfExist();
   if (client) {
     return client;
   }
   client = await authenticate({
     scopes: SCOPES,
-    keyfilePath: CREDENTIALS_PATH,
+    keyfilePath: PATH_TO_CREDS,
   });
   if (client.credentials) {
-    await saveCredentials(client);
+    await saveCredentials(client, PATH_TO_CREDS);
   }
   return client;
 }
