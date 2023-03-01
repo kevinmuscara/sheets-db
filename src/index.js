@@ -62,7 +62,7 @@ class Database {
           const rows      = tableData.data.values;
         
           if(!rows || rows.length === 0)
-            resolve({status: 200, users: [] });
+            resolve({status: 200, user: {} });
 
           let users = rows.map(([email, password]) => { return { email, password }});
           let user = users.filter(function(obj) {
