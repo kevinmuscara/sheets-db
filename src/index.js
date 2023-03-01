@@ -1,6 +1,5 @@
 const { authorize } = require('./util');
 const { google }    = require('googleapis');
-const sheets        = google.sheets('v4');
 
 class Database {
   constructor(spreadsheetId, PATH_TO_CREDS) {
