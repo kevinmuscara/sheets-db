@@ -1,3 +1,5 @@
 const Database = require('../index');
 
-new Database('spreadsheetId');
+const db = new Database('1gnnHyD7tLAJJsa4AunvokC6qbjNvRAK7vFAdzBiQX6Y');
+
+db.findMany().then(res => console.log(res));
