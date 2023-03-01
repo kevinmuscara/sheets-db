@@ -66,9 +66,7 @@ class Database {
 
           let users = rows.map(([email, password]) => { return { email, password }});
           let user = users.filter(function(obj) {
-            return Object.keys(options).every(function(prop) {
-              return obj[prop] === options[prop];
-            });
+            return Object.keys(options).every((prop) => { return obj[prop] === options[prop] });
           })[0];
 
           resolve({ status: 200, user });
