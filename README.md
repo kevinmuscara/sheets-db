@@ -1,5 +1,5 @@
 # sheets-db
-Using google sheets as database
+Using google sheets as a database
 
 ## Enable the API
 
