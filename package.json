@@ -1,0 +1,14 @@
+{
+  "name": "sheets-db",
+  "version": "1.0.0",
+  "description": "Using google sheets as a database",
+  "main": "src/index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "Kevin Muscara",
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
+    "googleapis": "^105.0.0"
+  }
+}
